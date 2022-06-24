@@ -1,0 +1,23 @@
+// Async business rule triggered upon update or insert of a change request
+
+
+(function executeRule(current, previous /*null when async*/ ) {
+
+    var gr = new GlideRecord('svc_ci_assoc');
+    gr.addQuery('ci_id', current.cmdb_ci);
+    gr.query();
+    gs.addInfoMessage(">>>>>>> " + current.cmdb_ci);
+    gs.addInfoMessage(">>>>>>> " + current.sys_id);
+
+    var impacted_services = new GlideRecord('task_cmdb_ci_service');
+    impacted_services.initialize();
+
+    while (gr.next()) {
+		gs.addInfoMessage(gr.getDisplayValue('service_id'));
+        impacted_services.cmdb_ci_service = gr.getValue('service_id');
+        impacted_services.task = current.sys_id;
+        impacted_services.insert();
+    }
+
+
+})(current, previous);
