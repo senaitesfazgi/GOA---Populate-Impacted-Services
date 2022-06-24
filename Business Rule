@@ -3,17 +3,27 @@
 
 (function executeRule(current, previous /*null when async*/ ) {
 
+	// get all records from CI/CMDB Association table which have 
     var gr = new GlideRecord('svc_ci_assoc');
     gr.addQuery('ci_id', current.cmdb_ci);
     gr.query();
-    gs.addInfoMessage(">>>>>>> " + current.cmdb_ci);
-    gs.addInfoMessage(">>>>>>> " + current.sys_id);
+	
+    //   gs.addInfoMessage(">>>>>>> " + current.cmdb_ci);
+    //   gs.addInfoMessage(">>>>>>> " + current.sys_id);
 
+	// delete all existing impacted services records associated to the change request CI
     var impacted_services = new GlideRecord('task_cmdb_ci_service');
+    impacted_services.addQuery('task', current.sys_id);
+    impacted_services.query();
+    impacted_services.setWorkflow(false); //Don't fire Business rule,notifications   
+    impacted_services.deleteMultiple();
+
+    // Initialize the Impacted services table
     impacted_services.initialize();
 
+	//iterate through the Associate table get all Service IDs and Populate them under the impacted services
     while (gr.next()) {
-		gs.addInfoMessage(gr.getDisplayValue('service_id'));
+        //gs.addInfoMessage(gr.getDisplayValue('service_id'));
         impacted_services.cmdb_ci_service = gr.getValue('service_id');
         impacted_services.task = current.sys_id;
         impacted_services.insert();
