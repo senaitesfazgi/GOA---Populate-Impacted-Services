@@ -1,15 +1,14 @@
-// Async business rule triggered upon update or insert of a change request
-
-
 (function executeRule(current, previous /*null when async*/ ) {
 
 	// get all records from CI/CMDB Association table which have 
     var gr = new GlideRecord('svc_ci_assoc');
-    gr.addQuery('ci_id', current.cmdb_ci);
+    //gr.addQuery('ci_id', current.cmdb_ci);
+	queryString = "ci_id.nameSTARTSWITH" + current.cmdb_ci.name;
+	gr.addEncodedQuery(queryString);
     gr.query();
 	
-    //   gs.addInfoMessage(">>>>>>> " + current.cmdb_ci);
-    //   gs.addInfoMessage(">>>>>>> " + current.sys_id);
+    //gs.addInfoMessage(">>>>>>> " + current.cmdb_ci.name);
+    //gs.addInfoMessage(">>>>>>> " + current.sys_id);
 
 	// delete all existing impacted services records associated to the change request CI
     var impacted_services = new GlideRecord('task_cmdb_ci_service');
